@@ -13,7 +13,7 @@ jobs:
     # macOS 11 n'est plus disponible sur GitHub Actions
     # Utilise macos-13 (le plus ancien encore disponible)
     # ou macos-14 pour une version plus récente
-    runs-on: macos-13
+    runs-on: macos-11
     
     steps:
     - name: Checkout du code
