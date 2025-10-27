@@ -1,0 +1,37 @@
+name: .NET 8 sur macOS
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  build-and-test:
+    # ATTENTION: macOS 13 sera retiré le 4 décembre 2025
+    # macOS 11 n'est plus disponible sur GitHub Actions
+    # Utilise macos-13 (le plus ancien encore disponible)
+    # ou macos-14 pour une version plus récente
+    runs-on: macos-13
+    
+    steps:
+    - name: Checkout du code
+      uses: actions/checkout@v4
+    
+    - name: Installation de .NET 8
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: '8.0.x'
+    
+    - name: Afficher la version de .NET
+      run: dotnet --version
+    
+    - name: Afficher les informations système
+      run: |
+        echo "Version macOS:"
+        sw_vers
+        echo ""
+        echo "Architecture:"
+        uname -m
+    
