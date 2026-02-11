@@ -1,6 +1,9 @@
 const loadAdsbMap = () => {
-    const iframe = document
-        .getElementById('adsbmap')
-        .getElementsByTagName('iframe')[0]
+    const container = document.getElementById('adsbmap')
+    if (!container) return
+
+    const iframe = container.getElementsByTagName('iframe')[0]
+    if (!iframe) return
+
     iframe.src = iframe.src
 }

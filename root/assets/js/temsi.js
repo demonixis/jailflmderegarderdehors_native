@@ -47,14 +47,19 @@ const parseXML = (xmlString) => {
 const getAvailableTemsi = () => {
     return fetch('/aviation-meteo/FR/aviation/serveur_donnees.jsp?ID=UACAVCPXNE&TYPE_DONNEES=CARTES&BASE_COMPLETE=non&VUE_CARTE=AERO_TEMSI&ZONE=AERO_FRANCE')
         .then(response => {
-            console.log(response)
+            if (!response.ok) throw new Error(`HTTP ${response.status}`);
             return response.text().then(value => parseXML(value));
         })
 }
 
 let loadTemsiCache = null
+let loadTemsiInProgress = false
+
 const loadTemsi = () => {
+    if (loadTemsiInProgress) return
+
     const pdfCanvas = document.querySelector('#temsi canvas')
+    if (!pdfCanvas) return
 
     try {
         let currentDate = new Date()
@@ -64,14 +69,26 @@ const loadTemsi = () => {
             return
         }
         loadTemsiCache = currentDate
+        loadTemsiInProgress = true
 
-        getAvailableTemsi().then(charts => {
-            const currentDateTime = currentDate.getTime()
-            const sortedChartsByClosestToCurrentDate = charts.sort((first, second) => (first.dateRun.getTime() - currentDateTime) - (second.dateRun.getTime() - currentDateTime))
-            return loadAndRenderPDF(pdfCanvas, sortedChartsByClosestToCurrentDate[0].imageLink, 40, 50, 50, 40)
-        })
+        getAvailableTemsi()
+            .then(charts => {
+                const currentDateTime = currentDate.getTime()
+                const sortedChartsByClosestToCurrentDate = charts.sort((first, second) => (first.dateRun.getTime() - currentDateTime) - (second.dateRun.getTime() - currentDateTime))
+                return loadAndRenderPDF(pdfCanvas, sortedChartsByClosestToCurrentDate[0].imageLink, 40, 50, 50, 40)
+            })
+            .catch(error => {
+                console.error('[TEMSI] Error loading chart:', error.message || error)
+                loadTemsiCache = null // Permet retry au prochain cycle
+            })
+            .finally(() => {
+                loadTemsiInProgress = false
+            })
     }
     catch(error) {
+        loadTemsiInProgress = false
+        console.error('[TEMSI] Error:', error.message || error)
+        loadTemsiCache = null
     }
 }
 

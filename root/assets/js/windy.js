@@ -1,6 +1,9 @@
 const loadWindy = () => {
-    const iframe = document
-        .getElementById('windy')
-        .getElementsByTagName('iframe')[0]
+    const container = document.getElementById('windy')
+    if (!container) return
+
+    const iframe = container.getElementsByTagName('iframe')[0]
+    if (!iframe) return
+
     iframe.src = iframe.src
 }

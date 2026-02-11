@@ -1,12 +1,27 @@
 const tabs = document.getElementsByClassName("tab")
 let tabIdx = 0
 
+// Registre des fonctions de chargement pour éviter eval()
+const loaderRegistry = {
+    loadMetarTaf,
+    loadRadar,
+    loadTemsi,
+    loadWindy,
+    loadScheduler,
+    loadWebcam,
+    loadAdsbMap
+}
+
 const navOlElement = document.querySelectorAll("nav ol")[0]
+if (!navOlElement) {
+    console.error('[CORE] Navigation element not found')
+}
+
 Array.prototype.forEach.call(tabs, function (tab) {
     // premier chargement
     const loaderDelegate = tab.getAttribute('data-loader')
-    if(loaderDelegate) {
-        eval(loaderDelegate + '()')
+    if(loaderDelegate && loaderRegistry[loaderDelegate]) {
+        loaderRegistry[loaderDelegate]()
     }
 
     // génération du menu
@@ -31,9 +46,9 @@ const showTab = (tab, forcedDelay = null) => {
     if (visibleTabs.length > 0) {
         // recharge les données pour le prochain cycle
         const loaderDelegate = visibleTabs[0].getAttribute('data-loader')
-        if(loaderDelegate) {
+        if(loaderDelegate && loaderRegistry[loaderDelegate]) {
             setTimeout(() => {
-                eval(loaderDelegate + '()')
+                loaderRegistry[loaderDelegate]()
             }, 1000)
         }
     }
@@ -41,6 +56,8 @@ const showTab = (tab, forcedDelay = null) => {
     tab.classList.remove('hidden')
 
     const viewPortElement = document.getElementById("viewport")
+    if (!viewPortElement) return
+
     const defaultBgClassName = tab.getAttribute('data-bg') || 'bg-final'
     viewPortElement.removeAttribute('class')
     if (defaultBgClassName !== null)
@@ -80,14 +97,15 @@ const showTab = (tab, forcedDelay = null) => {
 showTab(tabs[tabIdx])
 
 // temporaire pour contrer l'erreur 5 sur raspberry...
+// étendu à 2h pour tester la stabilité après corrections Phase 1
 setTimeout(() => {
     location.reload()
-}, 1800 * 1000)
+}, 7200 * 1000)
 
 let mouseMoveTimout = null
 const hideMouseDelay = (delayMs) => {
     if(mouseMoveTimout) {
-        clearInterval(mouseMoveTimout)
+        clearTimeout(mouseMoveTimout)
         mouseMoveTimout = null
     }
 

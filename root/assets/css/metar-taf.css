@@ -49,3 +49,8 @@
 #metar-taf .data:not(:first-child) {
     padding-top: 0.5rem;
 }
+
+#metar-taf .error {
+    color: #c00;
+    font-style: italic;
+}
